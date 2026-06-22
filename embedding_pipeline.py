@@ -437,66 +437,46 @@ class ChromaEmbeddingPipelineTextOnly:
         return filtered_files
     
     def add_documents_to_collection(self, documents: List[Tuple[str, Dict[str, Any]]], 
-                                   file_path: Path, batch_size: int = 50, 
-                                   update_mode: str = 'skip') -> Dict[str, int]:
-        """
-        Add documents to ChromaDB collection in batches with update handling
-        
-        Args:
-            documents: List of (text, metadata) tuples
-            file_path: Path to the source file
-            batch_size: Number of documents to process in each batch
-            update_mode: How to handle existing documents:
-                        'skip' - skip existing documents
-                        'update' - update existing documents
-                        'replace' - delete all existing documents from file and re-add
-            
-        Returns:
-            Dictionary with counts of added, updated, and skipped documents
-        """
+                                file_path: Path, batch_size: int = 50, 
+                                update_mode: str = 'skip') -> Dict[str, int]:
         if not documents:
             return {'added': 0, 'updated': 0, 'skipped': 0}
         
         stats = {'added': 0, 'updated': 0, 'skipped': 0}
         
-        # TODO: Handle different update modes (skip, update, replace)
-        # TODO: Process documents in batches
         mission = self.extract_mission_from_path(file_path)
         if mission == "unknown":
             logger.warning(f"Unknown mission for file: {file_path}")
             return stats
+
         mission_collection = self.chroma_client.get_or_create_collection(
             name=mission,
             embedding_function=self.embedding_function
         )
-        for start in tqdm(
-            range(0, len(documents), batch_size),
-            desc=f"Batches for {file_path.name}"
-        ):
+
+        for start in tqdm(range(0, len(documents), batch_size), desc=f"Batches for {file_path.name}"):
             batch = documents[start:start + batch_size]
-        # TODO: For each document:
-            for text, metadata in batch:
-        #   - Generate document ID
+
+            for text, metadata in batch:                          # ← level 2
                 doc_id = self.generate_document_id(file_path, metadata)
                 exists = self.check_document_exists(doc_id)
-        #   - Check if exists
-                if exists:
-                    if update_mode == "skip":  ## do not update
+
+                if exists:                                        # ← level 3
+                    if update_mode == "skip":
                         stats['skipped'] += 1
                         continue
                     elif update_mode == "update":
                         try:
-                            embedding = self.get_embedding(text) #   Get embedding
+                            embedding = self.get_embedding(text)
                         except Exception as e:
                             logger.error(f"Failed to get embedding for {doc_id}: {e}")
                             continue
                         self.collection.update(
-                            ids= [doc_id],
-                            documents = [text],
+                            ids=[doc_id],
+                            documents=[text],
                             embeddings=[embedding],
                             metadatas=[metadata]
                         )
-                        # specific mission 
                         mission_collection.update(
                             ids=[doc_id],
                             documents=[text],
@@ -505,10 +485,10 @@ class ChromaEmbeddingPipelineTextOnly:
                         )
                         stats['updated'] += 1
                         continue
-                
-                # new document - add it
+
+                # ← back to level 3, outside if exists — runs only for new docs
                 try:
-                    embedding = self.get_embedding(text) #   Get embedding
+                    embedding = self.get_embedding(text)
                 except Exception as e:
                     logger.error(f"Failed to get embedding for {doc_id}: {e}")
                     continue
@@ -516,17 +496,15 @@ class ChromaEmbeddingPipelineTextOnly:
                     ids=[doc_id],
                     documents=[text],
                     embeddings=[embedding],
-                    metadatas=[metadata])
-                 # specific mission 
-                mission_collection.update(
-                ids=[doc_id],
-                documents=[text],
-                embeddings=[embedding],
-                metadatas=[metadata]
-            )
+                    metadatas=[metadata]
+                )
+                mission_collection.add(
+                    ids=[doc_id],
+                    documents=[text],
+                    embeddings=[embedding],
+                    metadatas=[metadata]
+                )
                 stats['added'] += 1
-    
-        # TODO: Return statistics
 
         return stats
   
