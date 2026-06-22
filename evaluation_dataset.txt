@@ -1,3 +1,5 @@
+###### Challenger ######
+
 Question: who was the teacher on board challenger?
 Answer:The teacher on board the Space Shuttle Challenger during the ill-fated STS-51-L mission was Christa McAuliffe. She was selected to be the first private citizen in space as part of NASA's Teacher in Space Project. Tragically, the Challenger exploded 73 seconds after liftoff on January 28, 1986, resulting in the loss of all seven crew members, including McAuliffe.
 
@@ -12,4 +14,24 @@ Answer: The President of the United States during the Challenger mission was Ron
 
 Question: What did he say during his address on the disaster?
 Answer: The Space Shuttle Challenger disaster occurred on January 28, 1986. The President of the United States at that time was Ronald Reagan. In his address to the nation following the tragic event, President Reagan said, "We will never forget them, nor the last time we saw them this morning as they prepared for their journey and waved goodbye and 'slipped the surly bonds of Earth' to 'touch the face of God.'"
+
+##### Apollo 11 ######
+
+Question: when was apollo 11 mission
+Answer: The Apollo 11 mission was launched on July 16, 1969, at 09:32:00 Eastern Daylight Time from Kennedy Space Center, Complex 39, Pad A.
+
+Question: Who were the crew member onboard?
+Answer: The crew members onboard the Apollo 11 mission were:
+
+        Neil Armstrong (Commander)
+        Michael Collins (Command Module Pilot)
+        Edwin "Buzz" Aldrin (Lunar Module Pilot)    
+Question: Was the mission successful?
+Answer: The mission was indeed successful. The Principal and Secondary Detailed Objectives of the mission were completely accomplished without any failures, anomalies, or deviations that seriously affected the flight or mission. The launch countdown was completed smoothly, and the trajectory parameters were close to nominal.
+
+Question: How long did the mission take?
+Answer: The Apollo 11 mission lasted approximately 8 days, 3 hours, 18 minutes, and 35 seconds. It involved launching from Earth, landing on the Moon, conducting activities on the lunar surface, and returning safely back to Earth.
+
+Question: Who was the president during the launch?
+Answer: During the launch of the Apollo 11 mission on July 16, 1969, the President of the United States was Richard Nixon.
 
