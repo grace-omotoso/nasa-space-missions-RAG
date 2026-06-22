@@ -1,0 +1,2 @@
+OPENAI_API_KEY="your api key here"
+OPENAI_BASE_URL="https://openai.vocareum.com/v1" # change if using the standard openai key
