@@ -1,0 +1,15 @@
+Question: who was the teacher on board challenger?
+Answer:The teacher on board the Space Shuttle Challenger during the ill-fated STS-51-L mission was Christa McAuliffe. She was selected to be the first private citizen in space as part of NASA's Teacher in Space Project. Tragically, the Challenger exploded 73 seconds after liftoff on January 28, 1986, resulting in the loss of all seven crew members, including McAuliffe.
+
+Question: What happened to the Challenger?
+Answer: The Space Shuttle Challenger disaster occurred on January 28, 1986, when the shuttle broke apart 73 seconds into its flight, leading to the deaths of all seven crew members aboard. Christa McAuliffe, a teacher from New Hampshire, was one of the astronauts on board the Challenger. She was selected to be the first private citizen in space as part of NASA's Teacher in Space Project. The cause of the disaster was determined to be the failure of an O-ring seal in one of the solid rocket boosters, leading to the rapid disintegration of the shuttle. The tragedy led to a suspension of the space shuttle program and a thorough review of NASA's safety procedures.
+
+Question: What year was the mission?
+Answer: The Challenger space shuttle broke apart 73 seconds into its flight on January 28, 1986, resulting in the tragic deaths of all seven crew members on board, including the teacher Christa McAuliffe. The disaster was caused by the failure of an O-ring seal in one of the solid rocket boosters.
+
+Question: Who was the President of the United States during the Challenger mission?
+Answer: The President of the United States during the Challenger mission was Ronald Reagan.
+
+Question: What did he say during his address on the disaster?
+Answer: The Space Shuttle Challenger disaster occurred on January 28, 1986. The President of the United States at that time was Ronald Reagan. In his address to the nation following the tragic event, President Reagan said, "We will never forget them, nor the last time we saw them this morning as they prepared for their journey and waved goodbye and 'slipped the surly bonds of Earth' to 'touch the face of God.'"
+
