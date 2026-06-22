@@ -17,6 +17,8 @@ import llm_client
 
 from pathlib import Path
 from typing import Dict, List, Optional
+from dotenv import load_dotenv
+load_dotenv()
 
 # RAGAS imports
 try:

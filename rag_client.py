@@ -2,6 +2,12 @@ import chromadb
 from chromadb.config import Settings
 from typing import Dict, List, Optional
 from pathlib import Path
+import os
+from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction
+from dotenv import load_dotenv
+load_dotenv()
+openai_api_key = os.getenv("OPENAI_API_KEY")
+embedding_model = "text-embedding-3-small"
 
 def discover_chroma_backends() -> Dict[str, Dict[str, str]]:
     """Discover available ChromaDB backends in the project directory"""
@@ -67,7 +73,11 @@ def initialize_rag_system(chroma_dir: str, collection_name: str):
     # TODO: Create a chomadb persistentclient
     try:
         client = chromadb.PersistentClient(path=chroma_dir)
-        collection = client.get_collection(name=collection_name)
+        collection = client.get_collection(
+            name=collection_name,
+            embedding_function=OpenAIEmbeddingFunction(
+                api_key=openai_api_key,
+                model_name=embedding_model))
         # TODO: Return the collection with the collection_name
         return collection, True, None
     except Exception as e:
@@ -115,12 +125,12 @@ def format_context(documents: List[str], metadatas: List[Dict]) -> str:
         category = metadata.get("category", "General").replace("_", " ").title()
     
         # TODO: Create formatted source header with index number and extracted information
-        source_header =[
+        source_header =(
             f"\n Source{i} \n"
             f"Mission: {mission} | "
             f"Category: {category} | "
             f"Source: {source} "
-        ] 
+        )
         # TODO: Add source header to context parts list
         context_parts.append(source_header)
         # TODO: Check document length and truncate if necessary
