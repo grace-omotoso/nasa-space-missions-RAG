@@ -98,10 +98,11 @@ class ChromaEmbeddingPipelineTextOnly:
                 model_name=embedding_model
             ),
             metadata={"description": "NASA space mission documents with text only"}
-            
+
     def chunk_text(self, text: str, metadata: Dict[str, Any]) -> List[Tuple[str, Dict[str, Any]]]:
         """
-        Split text into chunks with metadata
+        Split text into chunks with metadata using a sliding window strategy.
+        Each consecutive chunk shares exactly chunk_overlap characters with the previous one.
 
         Args:
             text: Text to chunk
@@ -111,49 +112,37 @@ class ChromaEmbeddingPipelineTextOnly:
             List of (chunk_text, chunk_metadata) tuples
         """
 
-        def hard_split(s: str) -> List[str]:
-            """Force-split a string that exceeds chunk_size into smaller pieces"""
-            parts = []
-            while len(s) > self.chunk_size:
-                parts.append(s[:self.chunk_size])
-                s = s[self.chunk_size:]
-            if s:
-                parts.append(s)
-            return parts
-
         # Handle short texts that don't need chunking
         if len(text) <= self.chunk_size:
-            return [(text, metadata)]
+            return [(text, {**metadata, "chunk_index": 1, "chunk_count": 1})]
+
+        if self.chunk_overlap >= self.chunk_size:
+            raise ValueError(
+                f"chunk_overlap ({self.chunk_overlap}) must be less than "
+                f"chunk_size ({self.chunk_size})"
+            )
+
+        step = self.chunk_size - self.chunk_overlap  # advance this many chars each iteration
 
         chunks = []
-        current_chunk = ""
+        start = 0
 
-        # Try to break at sentence boundaries
-        sentences = re.split(r'(?<=[.!?])\s+', text)
+        while start < len(text):
+            end = min(start + self.chunk_size, len(text))
+            chunk = text[start:end]
 
-        for sentence in sentences:
-            # If the sentence itself exceeds chunk_size, hard split it first
-            if len(sentence) > self.chunk_size:
-                # Flush current chunk first
-                if current_chunk.strip():
-                    chunks.append(current_chunk.strip())
-                    current_chunk = ""
-                # Hard split the long sentence
-                for part in hard_split(sentence):
-                    chunks.append(part.strip())
-                continue
+            # Try to snap end to a sentence boundary (only when not at end of text)
+            if end < len(text):
+                # Find last sentence boundary within the chunk
+                match = re.search(r'(?<=[.!?])\s+\S', chunk[::-1])
+                if match:
+                    snap = len(chunk) - match.start()
+                    chunk = chunk[:snap].strip()
 
-            if len(current_chunk) + len(sentence) > self.chunk_size:
-                if current_chunk.strip():
-                    chunks.append(current_chunk.strip())
-                overlap = current_chunk[-self.chunk_overlap:] if self.chunk_overlap > 0 else ""
-                current_chunk = (overlap + " " + sentence).strip()
-            else:
-                current_chunk += " " + sentence
+            if chunk.strip():
+                chunks.append(chunk.strip())
 
-        # Add the last chunk
-        if current_chunk.strip():
-            chunks.append(current_chunk.strip())
+            start += step
 
         # Create metadata for each chunk
         chunk_output: List[Tuple[str, Dict[str, Any]]] = []
@@ -166,7 +155,7 @@ class ChromaEmbeddingPipelineTextOnly:
             chunk_output.append((chunk, chunk_metadata))
 
         return chunk_output
-        
+
     def check_document_exists(self, doc_id: str) -> bool:
         """
         Check if a document with the given ID already exists in the collection
