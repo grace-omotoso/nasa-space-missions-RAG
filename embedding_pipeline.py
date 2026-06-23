@@ -97,7 +97,7 @@ class ChromaEmbeddingPipelineTextOnly:
                 api_key=openai_api_key,
                 model_name=embedding_model
             ),
-            metadata={"description": "NASA space mission documents with text only"}
+            metadata={"description": "NASA space mission documents with text only"})
 
     def chunk_text(self, text: str, metadata: Dict[str, Any]) -> List[Tuple[str, Dict[str, Any]]]:
         """
@@ -111,7 +111,7 @@ class ChromaEmbeddingPipelineTextOnly:
         Returns:
             List of (chunk_text, chunk_metadata) tuples
         """
-
+    
         # Handle short texts that don't need chunking
         if len(text) <= self.chunk_size:
             return [(text, {**metadata, "chunk_index": 1, "chunk_count": 1})]
@@ -121,8 +121,8 @@ class ChromaEmbeddingPipelineTextOnly:
                 f"chunk_overlap ({self.chunk_overlap}) must be less than "
                 f"chunk_size ({self.chunk_size})"
             )
-
-        step = self.chunk_size - self.chunk_overlap  # advance this many chars each iteration
+         # Implement chunking logic with overlap
+        step = self.chunk_size - self.chunk_overlap  
 
         chunks = []
         start = 0
@@ -131,9 +131,9 @@ class ChromaEmbeddingPipelineTextOnly:
             end = min(start + self.chunk_size, len(text))
             chunk = text[start:end]
 
-            # Try to snap end to a sentence boundary (only when not at end of text)
+            # avoid cutting sentence mid way when not at the end of the text
             if end < len(text):
-                # Find last sentence boundary within the chunk
+                # Try to break at sentence boundaries
                 match = re.search(r'(?<=[.!?])\s+\S', chunk[::-1])
                 if match:
                     snap = len(chunk) - match.start()
