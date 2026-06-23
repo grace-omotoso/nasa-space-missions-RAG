@@ -98,53 +98,75 @@ class ChromaEmbeddingPipelineTextOnly:
                 model_name=embedding_model
             ),
             metadata={"description": "NASA space mission documents with text only"}
-        )
-    
+            
     def chunk_text(self, text: str, metadata: Dict[str, Any]) -> List[Tuple[str, Dict[str, Any]]]:
         """
         Split text into chunks with metadata
-        
+
         Args:
             text: Text to chunk
             metadata: Base metadata for the text
-            
+
         Returns:
             List of (chunk_text, chunk_metadata) tuples
         """
-  
-        # TODO: Handle short texts that don't need chunking
-        if len(text) <= self.chunk_size: 
+
+        def hard_split(s: str) -> List[str]:
+            """Force-split a string that exceeds chunk_size into smaller pieces"""
+            parts = []
+            while len(s) > self.chunk_size:
+                parts.append(s[:self.chunk_size])
+                s = s[self.chunk_size:]
+            if s:
+                parts.append(s)
+            return parts
+
+        # Handle short texts that don't need chunking
+        if len(text) <= self.chunk_size:
             return [(text, metadata)]
-        # TODO: Implement chunking logic with overlap
+
         chunks = []
         current_chunk = ""
-        # TODO: Try to break at sentence boundaries
+
+        # Try to break at sentence boundaries
         sentences = re.split(r'(?<=[.!?])\s+', text)
+
         for sentence in sentences:
+            # If the sentence itself exceeds chunk_size, hard split it first
+            if len(sentence) > self.chunk_size:
+                # Flush current chunk first
+                if current_chunk.strip():
+                    chunks.append(current_chunk.strip())
+                    current_chunk = ""
+                # Hard split the long sentence
+                for part in hard_split(sentence):
+                    chunks.append(part.strip())
+                continue
+
             if len(current_chunk) + len(sentence) > self.chunk_size:
-                chunks.append(current_chunk.strip())
                 if current_chunk.strip():
                     chunks.append(current_chunk.strip())
                 overlap = current_chunk[-self.chunk_overlap:] if self.chunk_overlap > 0 else ""
-                current_chunk = overlap + " " + sentence
+                current_chunk = (overlap + " " + sentence).strip()
             else:
                 current_chunk += " " + sentence
-        # add the last chunk produced in the loop
+
+        # Add the last chunk
         if current_chunk.strip():
             chunks.append(current_chunk.strip())
-         
+
+        # Create metadata for each chunk
         chunk_output: List[Tuple[str, Dict[str, Any]]] = []
-        # TODO: Create metadata for each chunk
         for i, chunk in enumerate(chunks, start=1):
-           chunk_metadata = {
-               **metadata,
-               "chunk_index": i,
-               "chunk_count": len(chunks)
-           }
-           chunk_output.append((chunk, chunk_metadata))
+            chunk_metadata = {
+                **metadata,
+                "chunk_index": i,
+                "chunk_count": len(chunks)
+            }
+            chunk_output.append((chunk, chunk_metadata))
 
         return chunk_output
-    
+        
     def check_document_exists(self, doc_id: str) -> bool:
         """
         Check if a document with the given ID already exists in the collection
