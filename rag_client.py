@@ -109,12 +109,22 @@ def format_context(documents: List[str], metadatas: List[Dict]) -> str:
     """Format retrieved documents into context"""
     if not documents:
         return ""
-    
+    # Deduplicate documents
+    seen_documents = set()
+    deduped_docs = []
+    deduped_metadatas = []
+    for doc, metadata in zip(documents, metadatas):
+        normalized = doc.strip().lower()
+        if normalized not in seen_documents:
+            seen_documents.add(normalized)
+            deduped_docs.append(doc)
+            deduped_metadatas.append(metadata)
+
     # TODO: Initialize list with header text for context section
     context_parts = ["\n\n--- Retrieved Documents ---"]
 
     # TODO: Loop through paired documents and their metadata using enumeration
-    for i, (document, metadata) in enumerate(zip(documents, metadatas), 1): # i starts from 1
+    for i, (document, metadata) in enumerate(zip(deduped_docs, deduped_metadatas), 1): # i starts from 1
         # TODO: Extract mission information from metadata with fallback value
         # TODO: Clean up mission name formatting (replace underscores, capitalize)
         mission = metadata.get("mission", "Unknown Mission").replace("_", " ").title()
