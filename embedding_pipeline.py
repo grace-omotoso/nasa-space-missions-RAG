@@ -450,11 +450,29 @@ class ChromaEmbeddingPipelineTextOnly:
     def add_documents_to_collection(self, documents: List[Tuple[str, Dict[str, Any]]], 
                                 file_path: Path, batch_size: int = 50, 
                                 update_mode: str = 'skip') -> Dict[str, int]:
+        """
+        Add documents to ChromaDB collection in batches with update handling
+        
+        Args:
+            documents: List of (text, metadata) tuples
+            file_path: Path to the source file
+            batch_size: Number of documents to process in each batch
+            update_mode: How to handle existing documents:
+                        'skip' - skip existing documents
+                        'update' - update existing documents
+                        'replace' - delete all existing documents from file and re-add
+            
+        Returns:
+            Dictionary with counts of added, updated, and skipped documents
+        """
+
         if not documents:
             return {'added': 0, 'updated': 0, 'skipped': 0}
         
         stats = {'added': 0, 'updated': 0, 'skipped': 0}
         
+        # TODO: Handle different update modes (skip, update, replace)
+
         mission = self.extract_mission_from_path(file_path)
         if mission == "unknown":
             logger.warning(f"Unknown mission for file: {file_path}")
@@ -465,17 +483,32 @@ class ChromaEmbeddingPipelineTextOnly:
             embedding_function=self.embedding_function
         )
 
+        # Handle replace mode: delete all existing chunks for this file first
+        if update_mode == "replace":
+            deleted = self.delete_documents_by_source(str(file_path))
+            logger.info(f"Replace mode: removed {deleted} existing chunks for {file_path.name}")
+         # delete  mission collection too
+            try:
+                mission_docs = mission_collection.get(where={"source": str(file_path)})
+                if mission_docs and mission_docs["ids"]:
+                    mission_collection.delete(ids=mission_docs["ids"])
+            except Exception as e:
+                logger.error(f"Failed to delete from mission collection: {e}")
+
+        # TODO: Process documents in batches
         for start in tqdm(range(0, len(documents), batch_size), desc=f"Batches for {file_path.name}"):
             batch = documents[start:start + batch_size]
 
-            for text, metadata in batch:                          # ← level 2
+            for text, metadata in batch:
+                #   - Generate document ID
                 doc_id = self.generate_document_id(file_path, metadata)
                 exists = self.check_document_exists(doc_id)
-
-                if exists:                                        # ← level 3
+                #   - Check if exists
+                if exists and update_mode != "replace":  
                     if update_mode == "skip":
                         stats['skipped'] += 1
                         continue
+                    # Update in collection
                     elif update_mode == "update":
                         try:
                             embedding = self.get_embedding(text)
@@ -497,7 +530,7 @@ class ChromaEmbeddingPipelineTextOnly:
                         stats['updated'] += 1
                         continue
 
-                # ← back to level 3, outside if exists — runs only for new docs
+                #  Add  collection (always runs in replace mode since old ones are deleted)
                 try:
                     embedding = self.get_embedding(text)
                 except Exception as e:
@@ -516,8 +549,7 @@ class ChromaEmbeddingPipelineTextOnly:
                     metadatas=[metadata]
                 )
                 stats['added'] += 1
-
-        return stats
+            
   
     def process_all_text_data(self, base_path: str, update_mode: str = 'skip') -> Dict[str, int]:
         """
