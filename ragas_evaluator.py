@@ -11,7 +11,7 @@ load_dotenv()
 # RAGAS imports
 try:
     from ragas import SingleTurnSample
-    from ragas.metrics import BleuScore, NonLLMContextPrecisionWithReference, ResponseRelevancy, Faithfulness, RougeScore
+    from ragas.metrics import ResponseRelevancy, Faithfulness, RougeScore
     from ragas import evaluate
     RAGAS_AVAILABLE = True
 except ImportError:
@@ -46,7 +46,8 @@ def evaluate_response_quality(question: str, answer: str, contexts: List[str]) -
     # TODO: Define an instance for each metric to evaluate
     metrics = [
         ResponseRelevancy(),
-        Faithfulness() # this takes forever
+        Faithfulness(), 
+        RougeScore()
     ]
     # TODO: Evaluate the response using the metrics
     sample = SingleTurnSample(
@@ -58,4 +59,10 @@ def evaluate_response_quality(question: str, answer: str, contexts: List[str]) -
     # TODO: Return the evaluation results
     dataset = EvaluationDataset(samples=[sample])
     results = evaluate(dataset, metrics=metrics, llm=evaluator_llm, embeddings=evaluator_embeddings)
-    return results.to_pandas().to_dict()
+    results_dict = results.to_pandas().to_dict(orient="records")[0]
+
+    return {
+        "response_relevancy": results_dict.get("response_relevancy", None),
+        "faithfulness": results_dict.get("faithfulness", None),
+        "rouge_score": results_dict.get("rouge_score", None)
+    }
