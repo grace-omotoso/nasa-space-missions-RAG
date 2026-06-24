@@ -202,6 +202,11 @@ data/
    scores = evaluate_response_quality("question", "answer", ["context"])
    print(scores)
    ```
+   
+5. **Batch Evaluation**(Using the evaluation_dataset file, modify accordingly):
+   ```python
+   python ragas_evaluator.py
+   ```
 
 ### **Integration Testing**
 
