@@ -1,7 +1,7 @@
-#from ragas.llms import LangchainLLMWrapper
-#from ragas.embeddings import LangchainEmbeddingsWrapper
+from ragas.llms import LangchainLLMWrapper
+from ragas.embeddings import LangchainEmbeddingsWrapper
 from langchain_openai import ChatOpenAI
-#from langchain_openai import OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
 from typing import Dict, List, Optional
 from ragas import EvaluationDataset
 from dotenv import load_dotenv
@@ -12,6 +12,7 @@ import sys
 from openai import OpenAI as OpenAIClient
 from ragas.llms import llm_factory
 from ragas.embeddings import OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings as LangchainOpenAIEmbeddings
 
 load_dotenv()
 # RAGAS imports
@@ -52,10 +53,15 @@ def evaluate_response_quality(question: str, answer: str, contexts: List[str],
         max_retries=3)
     
     evaluator_llm = llm_factory("gpt-3.5-turbo", client=openai_client)
-    evaluator_embeddings = OpenAIEmbeddings(
-    client=openai_client,
-    model="text-embedding-3-small"
+
+    evaluator_embeddings = LangchainEmbeddingsWrapper(
+    LangchainOpenAIEmbeddings(
+        model="text-embedding-3-small",
+        api_key=api_key,
+        base_url=base_url
+    )
 )
+
 
 
     # Only ResponseRelevancy for now — fastest metric, faithfulness is slow
