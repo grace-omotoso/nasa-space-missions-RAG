@@ -550,7 +550,8 @@ class ChromaEmbeddingPipelineTextOnly:
                 )
                 stats['added'] += 1
             
-  
+        return stats
+    
     def process_all_text_data(self, base_path: str, update_mode: str = 'skip') -> Dict[str, int]:
         """
         Process all text files and add to ChromaDB
