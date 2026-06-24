@@ -63,6 +63,8 @@ def evaluate_response_quality(question: str, answer: str, contexts: List[str],
 )
     # Only ResponseRelevancy for now — fastest metric, faithfulness is slow
     metrics = [ResponseRelevancy(strictness=1)] # voc apis only returns 1 generation
+    
+    # Add RougeScore if reference is provided
     if reference is not None:
         metrics.append(RougeScore())
 
@@ -87,9 +89,6 @@ def evaluate_response_quality(question: str, answer: str, contexts: List[str],
         llm=evaluator_llm, 
         embeddings=evaluator_embeddings
     )
-
-    df = results.to_pandas()
-    print(f"  DEBUG columns: {df.columns.tolist()}")
 
     results_dict = df.to_dict(orient="records")[0]
 
