@@ -69,7 +69,6 @@ def evaluate_response_quality(question: str, answer: str, contexts: List[str],
     if not metrics:
         return {
             "response_relevancy": None,
-            "faithfulness": None,
             "rouge_score": None,
             "error": "No metrics to evaluate — reference is None"
         }
@@ -96,7 +95,6 @@ def evaluate_response_quality(question: str, answer: str, contexts: List[str],
 
     return {
         "response_relevancy": results_dict.get("answer_relevancy", None),
-        "faithfulness": results_dict.get("faithfulness", None),
         "rouge_score": results_dict.get("rouge_score(mode=fmeasure)", None)
     }
 
