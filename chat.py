@@ -11,14 +11,22 @@ import os
 import json
 import pandas as pd
 
-import ragas_evaluator
+from ragas_evaluator import parse_evaluation_dataset
 import rag_client
 import llm_client
+import ragas_evaluator
 
 from pathlib import Path
 from typing import Dict, List, Optional
 from dotenv import load_dotenv
 load_dotenv()
+
+# Get reference of evaluation_dataset
+# Load the evaluation dataset 
+EVALUATION_DATASET = parse_evaluation_dataset("evaluation_dataset.txt")
+# Build a lookup dict for quick access: question -> reference
+REFERENCE_LOOKUP = {pair["question"].strip().lower(): pair["reference"] 
+                    for pair in EVALUATION_DATASET}
 
 # RAGAS imports
 try:
@@ -71,10 +79,10 @@ def generate_response(openai_key, user_message: str, context: str,
     except Exception as e:
         return f"Error generating response: {e}"
 
-def evaluate_response_quality(question: str, answer: str, contexts: List[str]) -> Dict[str, float]:
+def evaluate_response_quality(question: str, answer: str, contexts: List[str],  reference: str = None) -> Dict[str, float]:
     """Evaluate response quality using RAGAS metrics"""
     try:
-        return ragas_evaluator.evaluate_response_quality(question, answer, contexts)
+        return ragas_evaluator.evaluate_response_quality(question, answer, contexts,  reference)
     except Exception as e:
         return {"error": f"Evaluation failed: {str(e)}"}
 
@@ -240,10 +248,12 @@ def main():
                 # Evaluate response quality if enabled
                 if enable_evaluation and RAGAS_AVAILABLE:
                     with st.spinner("Evaluating response quality..."):
+                        reference = REFERENCE_LOOKUP.get(prompt.strip().lower(), None)
                         evaluation_scores = evaluate_response_quality(
                             prompt, 
                             response, 
-                            contexts_list
+                            contexts_list,
+                            reference
                         )
                         st.session_state.last_evaluation = evaluation_scores
         
