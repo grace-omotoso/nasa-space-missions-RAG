@@ -61,13 +61,18 @@ def evaluate_response_quality(question: str, answer: str, contexts: List[str],
         base_url=base_url
     )
 )
-
-
-
     # Only ResponseRelevancy for now — fastest metric, faithfulness is slow
-    metrics = [ResponseRelevancy()]
+    metrics = [ResponseRelevancy(strictness=1)] # voc apis only returns 1 generation
     if reference is not None:
         metrics.append(RougeScore())
+
+    if not metrics:
+        return {
+            "response_relevancy": None,
+            "faithfulness": None,
+            "rouge_score": None,
+            "error": "No metrics to evaluate — reference is None"
+        }
 
     sample = SingleTurnSample(
         user_input=question,
@@ -78,17 +83,21 @@ def evaluate_response_quality(question: str, answer: str, contexts: List[str],
 
     dataset = EvaluationDataset(samples=[sample])
     results = evaluate(
-        dataset, 
-        metrics=metrics, 
+        dataset,
+        metrics=metrics,
         llm=evaluator_llm, 
         embeddings=evaluator_embeddings
     )
-    results_dict = results.to_pandas().to_dict(orient="records")[0]
+
+    df = results.to_pandas()
+    print(f"  DEBUG columns: {df.columns.tolist()}")
+
+    results_dict = df.to_dict(orient="records")[0]
 
     return {
-        "response_relevancy": results_dict.get("response_relevancy", None),
+        "response_relevancy": results_dict.get("answer_relevancy", None),
         "faithfulness": results_dict.get("faithfulness", None),
-        "rouge_score": results_dict.get("rouge_score", None)
+        "rouge_score": results_dict.get("rouge_score(mode=fmeasure)", None)
     }
 
 def parse_evaluation_dataset(file_path: str) -> List[Dict[str, str]]:
@@ -141,9 +150,9 @@ def evaluate_dataset(file_path: str, embedding_pipeline, openai_key: str) -> Non
 
     all_scores = {
         "response_relevancy": [],
-        "faithfulness": [],
         "rouge_score": []
     }
+   
 
     print(f"\nEvaluating {len(qa_pairs)} questions...\n")
     print("=" * 60)
