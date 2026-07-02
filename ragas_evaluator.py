@@ -14,6 +14,7 @@ from ragas.llms import llm_factory
 from ragas.embeddings import OpenAIEmbeddings
 from langchain_openai import OpenAIEmbeddings as LangchainOpenAIEmbeddings
 
+
 load_dotenv()
 # RAGAS imports
 try:
@@ -89,7 +90,7 @@ def evaluate_response_quality(question: str, answer: str, contexts: List[str],
         llm=evaluator_llm, 
         embeddings=evaluator_embeddings
     )
-
+    df = results.to_pandas()
     results_dict = df.to_dict(orient="records")[0]
 
     return {
