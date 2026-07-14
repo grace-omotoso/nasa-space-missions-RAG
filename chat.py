@@ -21,6 +21,30 @@ from typing import Dict, List, Optional
 from dotenv import load_dotenv
 load_dotenv()
 
+# --- Download prebuilt ChromaDB if not present locally ---
+CHROMA_DIR = "chroma_db_openai"
+CHROMA_ZIP_URL = "https://github.com/grace-omotoso/nasa-space-missions-RAG/releases/download/v1.0-embeddings/chroma_db_openai.zip"
+
+@st.cache_resource
+def ensure_chroma_db():
+    if not os.path.exists(CHROMA_DIR):
+        with st.spinner("Downloading vector database (first run only)..."):
+            zip_path = "chroma_db_openai.zip"
+            response = requests.get(CHROMA_ZIP_URL, stream=True)
+            response.raise_for_status()
+            with open(zip_path, "wb") as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+
+            with zipfile.ZipFile(zip_path, "r") as zip_ref:
+                zip_ref.extractall(".")
+
+            os.remove(zip_path)
+    return CHROMA_DIR
+
+ensure_chroma_db()
+# --- end download block ---
+
 # Get reference of evaluation_dataset
 # Load the evaluation dataset 
 EVALUATION_DATASET = parse_evaluation_dataset("evaluation_dataset.txt")
