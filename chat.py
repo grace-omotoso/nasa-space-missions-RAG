@@ -140,6 +140,15 @@ def display_evaluation_metrics(scores: Dict[str, float]):
             st.sidebar.progress(score)
 
 def main():
+    # Hide the show/hide password toggle button on password-type inputs
+    st.markdown("""
+    <style>
+    div[data-testid="stTextInput"] button {
+        display: none !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     st.title("🚀 NASA Space Mission Chat with Evaluation")
     st.markdown("Chat with AI about NASA space missions with real-time quality evaluation")
     
