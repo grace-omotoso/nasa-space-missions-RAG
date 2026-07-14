@@ -15,6 +15,7 @@ from ragas_evaluator import parse_evaluation_dataset
 import rag_client
 import llm_client
 import ragas_evaluator
+import requests
 
 from pathlib import Path
 from typing import Dict, List, Optional
