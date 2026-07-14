@@ -16,6 +16,7 @@ import rag_client
 import llm_client
 import ragas_evaluator
 import requests
+import zipfile
 
 from pathlib import Path
 from typing import Dict, List, Optional
