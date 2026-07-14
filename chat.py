@@ -237,7 +237,7 @@ def main():
             st.markdown(message["content"])
     
     # Chat input
-    if prompt := st.chat_input("Ask about NASA space missions..."):
+    if prompt := st.chat_input("Ask about NASA space missions (challenger, apollo11 or apollo13)"):
         # Add user message to chat history
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
