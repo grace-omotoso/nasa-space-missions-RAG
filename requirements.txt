@@ -6,3 +6,4 @@ ragas==0.4.3
 pandas==3.0.2
 streamlit==1.56.0
 requests
+rouge_score
