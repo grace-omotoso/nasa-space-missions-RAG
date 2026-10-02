@@ -17,8 +17,7 @@ def generate_response(openai_key: str, user_message: str, context: str,
  
     # Create OpenAI Client
     client = OpenAI(
-            api_key=openai_key,
-            base_url="https://openai.vocareum.com/v1"
+            api_key=openai_key
     )
     messages = [
     {"role": "system", "content": SYSTEM_PROMPT},
