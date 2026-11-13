@@ -276,7 +276,7 @@ Your implementation is successful when:
 - Embedding model selection
 
 ### **LLM Client**
-- Model selection (GPT-3.5-turbo, GPT-4)
+- Model selection (gpt-5.6-sol)
 - Temperature and creativity settings
 - Maximum token limits
 - Conversation history length

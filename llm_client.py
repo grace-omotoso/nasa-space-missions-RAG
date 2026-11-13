@@ -2,7 +2,7 @@ from typing import Dict, List
 from openai import OpenAI
 
 def generate_response(openai_key: str, user_message: str, context: str, 
-                     conversation_history: List[Dict], model: str = "gpt-3.5-turbo") -> str:
+                     conversation_history: List[Dict], model: str = "gpt-5.6-sol") -> str:
     """Generate response using OpenAI with context"""
 
     # Define system prompt telling LLM to generate answers based of provided documents
