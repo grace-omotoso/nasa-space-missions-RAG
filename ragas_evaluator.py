@@ -53,7 +53,7 @@ def evaluate_response_quality(question: str, answer: str, contexts: List[str],
         timeout = 120.0,
         max_retries=3)
     
-    evaluator_llm = llm_factory("gpt-3.5-turbo", client=openai_client)
+    evaluator_llm = llm_factory("gpt-5.6-sol", client=openai_client)
 
     evaluator_embeddings = LangchainEmbeddingsWrapper(
     LangchainOpenAIEmbeddings(
