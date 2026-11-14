@@ -30,7 +30,6 @@ def evaluate_response_quality(question: str, answer: str, contexts: List[str],
     """Evaluate response quality using RAGAS metrics"""
 
     api_key = os.getenv("OPENAI_API_KEY")
-    base_url = "https://openai.vocareum.com/v1" if api_key.startswith("voc") else None
 
     if not RAGAS_AVAILABLE:
         return {"error": "RAGAS not available"}
@@ -49,7 +48,6 @@ def evaluate_response_quality(question: str, answer: str, contexts: List[str],
     # Create LLM and embeddings for evaluation
     openai_client = OpenAIClient(
         api_key=api_key, 
-        base_url=base_url,
         timeout = 120.0,
         max_retries=3)
     
@@ -59,11 +57,10 @@ def evaluate_response_quality(question: str, answer: str, contexts: List[str],
     LangchainOpenAIEmbeddings(
         model="text-embedding-3-small",
         api_key=api_key,
-        base_url=base_url
     )
 )
     # Only ResponseRelevancy for now — fastest metric, faithfulness is slow
-    metrics = [ResponseRelevancy(strictness=1)] # voc apis only returns 1 generation
+    metrics = [ResponseRelevancy(strictness=3)] 
     
     # Add RougeScore if reference is provided
     if reference is not None:
