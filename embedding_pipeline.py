@@ -68,7 +68,6 @@ class ChromaEmbeddingPipelineTextOnly:
         # TODO: Initialize OpenAI client
         self.client = OpenAI(
             api_key=openai_api_key,
-            base_url="https://openai.vocareum.com/v1" if openai_api_key.startswith("voc") else None,
             timeout=60.0
         )
         # TODO: Store configuration parameters

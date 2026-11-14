@@ -10,6 +10,7 @@ import streamlit as st
 import os
 import json
 import pandas as pd
+import math
 
 from ragas_evaluator import parse_evaluation_dataset
 import rag_client
@@ -112,32 +113,49 @@ def evaluate_response_quality(question: str, answer: str, contexts: List[str],  
     except Exception as e:
         return {"error": f"Evaluation failed: {str(e)}"}
 
+
+import math
+
 def display_evaluation_metrics(scores: Dict[str, float]):
     """Display evaluation metrics in the sidebar"""
+
     if "error" in scores:
         st.sidebar.error(f"Evaluation Error: {scores['error']}")
         return
-    
+
     st.sidebar.subheader("📊 Response Quality")
-    
+
     for metric_name, score in scores.items():
-        if isinstance(score, (int, float)):
-            # Color code based on score
-            if score >= 0.8:
-                color = "green"
-            elif score >= 0.6:
-                color = "orange"
-            else:
-                color = "red"
-            
-            st.sidebar.metric(
-                label=metric_name.replace('_', ' ').title(),
-                value=f"{score:.3f}",
-                delta=None
-            )
-            
-            # Add progress bar
-            st.sidebar.progress(score)
+
+        # Skip missing, invalid, or non-numeric scores
+        if not isinstance(score, (int, float)) or not math.isfinite(score):
+            st.sidebar.warning(f"{metric_name}: Score unavailable")
+            continue
+
+        score = float(score)
+
+        # Ensure score is within expected range
+        if not 0 <= score <= 1:
+            st.sidebar.warning(f"{metric_name}: Invalid score ({score})")
+            continue
+
+        # Color code based on score
+        if score >= 0.8:
+            color = "green"
+        elif score >= 0.6:
+            color = "orange"
+        else:
+            color = "red"
+
+        st.sidebar.metric(
+            label=metric_name.replace('_', ' ').title(),
+            value=f"{score:.3f}",
+            delta=None
+        )
+
+        # Add progress bar
+        st.sidebar.progress(score)
+
 
 def main():
     # Hide the show/hide password toggle button on password-type inputs
@@ -201,6 +219,7 @@ def main():
             st.warning("Please enter your OpenAI API key")
             st.stop()
         else:
+            os.environ["OPENAI_API_KEY"] = openai_key
             os.environ["CHROMA_OPENAI_API_KEY"] = openai_key
         
         # Model selection
